@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title> MusicMe </title>
+      <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
+      <link rel="stylesheet" href="public/index.css">
+  </head>
+    <body>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/sign-in">Link Spotify</a></li>
+            <li><a href="/play">Play Music</a></li>
+        </ul>
+        <br>
+        <div class='input-holder'>
+            <input type="text" id="search">
+            <input type="submit" value="Search!" id="search-button">
+        </div>
+        <div class="songHolder">
+
+        </div>
+
+        <template id="song">
+            <div class="song-container" id="song1">
+              <div class="id">1</div>
+              <div class="title">Hi</div>
+              <div class="artist">Author time</div>
+              <div class="link">Genre:</div>
+            </div>
+        </template>
+    </body>
+    <script src="public/index.js"></script>
+</html>

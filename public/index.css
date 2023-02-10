@@ -1,0 +1,63 @@
+body {
+    background-color:rgb(230, 183, 235)
+}
+.input-holder {
+    margin: auto;
+    margin-left: 35%;
+    margin-right: 35%;
+    margin-top:40px;
+    border: 3px solid black;
+    padding: 10px;
+}
+.book-container {
+    margin: auto;
+    margin-left: 35%;
+    margin-right: 35%;
+    margin-top:40px;
+    border: 3px solid black;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 15% 30% 40%;
+    gap: 5px;
+}
+.id {
+    grid-column: 1;
+    grid-row: 1;
+    color:black;
+}
+.song {
+    grid-column:3;
+    grid-row:1;
+    color:black;
+}
+.artist {
+    grid-column: 2;
+    grid-row: 2;
+    color:black;}
+.link {
+    color:black;
+}
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+  }
+  
+li {
+    float: left;
+}
+  
+li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+  
+
+li a:hover {
+    background-color: #111;
+}
