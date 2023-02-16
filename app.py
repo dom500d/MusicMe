@@ -17,6 +17,7 @@ import base64
 import webbrowser
 import os
 import requests
+import urllib
 
 
 load_dotenv()
@@ -25,12 +26,8 @@ client_secret = os.getenv('CLIENT_SECRET')
 redirect_uri = "http://localhost:6543/callback"
 headers = {}
 access_token = ""
-    
 app = FastAPI()
 app.mount("/public", StaticFiles(directory="public"), name="public")
-
-
-
 def get_access_token(auth_code: str):
     response = requests.post(
         "https://accounts.spotify.com/api/token",
@@ -71,24 +68,34 @@ async def auth():
 
 @app.get("/search/{item:path}")
 async def search(item: str):
-    global headers
-    print(headers)
+    # global headers
+    # print(headers)
     toSend = {}
-    params = {
+    # params = {
+    #     'q': item,
+    #     'type': 'track',
+    #     'limit': 5
+    # }
+    # response = requests.get("https://api.spotify.com/v1/search", headers=headers, params=params)
+    # answer = response.json()
+    # for i in range(0, len(answer['tracks']['items'])) :
+    #     toSend.update({i: {'link': answer['tracks']['items'][i]['external_urls']['spotify'], 'artist': answer['tracks']['items'][i]['artists'][0]['name'], 'song': answer['tracks']['items'][i]['name']}})
+    soundcloud_id = "VTl9gNS05wF10zfiwKJ6FwK9mJsLVuAV"
+    paramsSoundCloud = {
         'q': item,
-        'type': 'track',
-        'limit': 5
-    }
-    response = requests.get("https://api.spotify.com/v1/search", headers=headers, params=params)
-    answer = response.json()
-    print(answer)
-    for i in range(0, len(answer['tracks']['items'])) :
-        toSend.update({i: {'link': answer['tracks']['items'][i]['external_urls']['spotify'], 'artist': answer['tracks']['items'][i]['artists'][0]['name'], 'song': answer['tracks']['items'][i]['name']}})
-    print(answer['tracks']['items'][0]['external_urls']['spotify'])
-    print(answer['tracks']['items'][0]['artists'][0]['name'])
-    print(answer['tracks']['items'][0]['name'])
-    print("hi")
-    print(toSend)
+        'limit': 5,
+        'client_id': soundcloud_id
+    }    
+    url = "https://api-v2.soundcloud.com/search?q=" + item + "&client_id=" + soundcloud_id
+    url = "https://api-v2.soundcloud.com/search?q=" + urllib.parse.quote(item)
+    url = url + "&limit=" + urllib.parse.quote("5") + "&client_id=" + urllib.parse.quote(soundcloud_id)
+    responseSoundCloud = requests.get(url)
+    answerSoundCloud = responseSoundCloud.json()
+    print(answerSoundCloud['collection'])
+    for c in range(0, len(answerSoundCloud['collection'])):
+        toSend.update( {i: {'link': answerSoundCloud['collection'][i]['uri'], 'artist': answerSoundCloud['collection'][i]['publisher_metadata']['artist'], 'title': answerSoundCloud['collection'][i]['title']}})
+    
+    toSend = {'soundCloud': toSend}
     return toSend
 
 
@@ -100,30 +107,30 @@ async def callback(code):
     response = requests.get("https://api.spotify.com/v1/me", headers=headers)
     return RedirectResponse(url='/', headers={'token': access_token})
 
-    # name = "Name of your playlist"
-    # description = "Description of your playlist"
-
-    # params = {
-    #     "name": name,
-    #     "description": description,
-    #     "public": True,
-    # }
-
-    # url = f"https://api.spotify.com/v1/users/{user_id}/playlists"
-    # response = requests.post(url=url, headers=headers, json=params)
-    # playlist_id = response.json()["id"]
-
-    # track_uri = "spotify:track:319eU2WvplIHzjvogpnNc6"
-    # response = requests.post(
-    #     f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks",
-    #     headers=headers,
-    #     json={"uris": [track_uri]},
-    # )
-    # if response.status_code == 201:
-    #     return {"message": "Track added successfully!"}
-    # else:
-    #     return {"error": response.json()}
-
-
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=6543)
+
+
+# name = "Name of your playlist"
+# description = "Description of your playlist"
+
+# params = {
+#     "name": name,
+#     "description": description,
+#     "public": True,
+# }
+
+# url = f"https://api.spotify.com/v1/users/{user_id}/playlists"
+# response = requests.post(url=url, headers=headers, json=params)
+# playlist_id = response.json()["id"]
+
+# track_uri = "spotify:track:319eU2WvplIHzjvogpnNc6"
+# response = requests.post(
+#     f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks",
+#     headers=headers,
+#     json={"uris": [track_uri]},
+# )
+# if response.status_code == 201:
+#     return {"message": "Track added successfully!"}
+# else:
+#     return {"error": response.json()}
