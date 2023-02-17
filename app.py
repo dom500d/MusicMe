@@ -68,32 +68,43 @@ async def auth():
 
 @app.get("/search/{item:path}")
 async def search(item: str):
-    # global headers
-    # print(headers)
-    toSend = {}
-    # params = {
-    #     'q': item,
-    #     'type': 'track',
-    #     'limit': 5
-    # }
-    # response = requests.get("https://api.spotify.com/v1/search", headers=headers, params=params)
-    # answer = response.json()
-    # for i in range(0, len(answer['tracks']['items'])) :
-    #     toSend.update({i: {'link': answer['tracks']['items'][i]['external_urls']['spotify'], 'artist': answer['tracks']['items'][i]['artists'][0]['name'], 'song': answer['tracks']['items'][i]['name']}})
-    soundcloud_id = "VTl9gNS05wF10zfiwKJ6FwK9mJsLVuAV"
-    paramsSoundCloud = {
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0"})
+    global headers
+    print(headers)
+    toSend = {'spotify': {}, 'soundcloud': {}}
+    params = {
         'q': item,
-        'limit': 5,
-        'client_id': soundcloud_id
-    }    
+        'type': 'track',
+        'limit': 5
+    }
+    response = requests.get("https://api.spotify.com/v1/search", headers=headers, params=params)
+    answer = response.json()
+    for i in range(0, len(answer['tracks']['items'])) :
+        toSend['spotify'].update({i: {'link': answer['tracks']['items'][i]['external_urls']['spotify'], 'artist': answer['tracks']['items'][i]['artists'][0]['name'], 'song': answer['tracks']['items'][i]['name']}})
+    soundcloud_id = "VTl9gNS05wF10zfiwKJ6FwK9mJsLVuAV"
     url = "https://api-v2.soundcloud.com/search?q=" + item + "&client_id=" + soundcloud_id
     url = "https://api-v2.soundcloud.com/search?q=" + urllib.parse.quote(item)
     url = url + "&limit=" + urllib.parse.quote("5") + "&client_id=" + urllib.parse.quote(soundcloud_id)
-    responseSoundCloud = requests.get(url)
+    print(url)
+    responseSoundCloud = session.get(url)
     answerSoundCloud = responseSoundCloud.json()
-    print(answerSoundCloud['collection'])
-    for c in range(0, len(answerSoundCloud['collection'])):
-        toSend.update( {i: {'link': answerSoundCloud['collection'][i]['uri'], 'artist': answerSoundCloud['collection'][i]['publisher_metadata']['artist'], 'title': answerSoundCloud['collection'][i]['title']}})
+    # if not answerSoundCloud:
+    #     return {'status': 'empty'}
+    # print(answerSoundCloud)
+    # print(answerSoundCloud['collection'])
+    # print('\n\n\n')
+    # print(answerSoundCloud['collection'][0]['publisher_metadata'])
+    # print(len(answerSoundCloud['collection']))
+    # 
+    for c in range(0, len(answerSoundCloud['collection'])-1):
+        link = answerSoundCloud['collection'][c]['uri']
+        if answerSoundCloud['collection'][c]['user'] != None:
+            artist = answerSoundCloud['collection'][c]['user']['username']
+        else:
+            artist = 'none'
+        title = answerSoundCloud['collection'][c]['title']
+        toSend.update( {c: {'link': link, 'artist': artist, 'title': title}})
     
     toSend = {'soundCloud': toSend}
     return toSend
