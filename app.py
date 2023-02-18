@@ -81,7 +81,7 @@ async def search(item: str):
     response = requests.get("https://api.spotify.com/v1/search", headers=headers, params=params)
     answer = response.json()
     for i in range(0, len(answer['tracks']['items'])) :
-        toSend['spotify'].update({i: {'link': answer['tracks']['items'][i]['external_urls']['spotify'], 'artist': answer['tracks']['items'][i]['artists'][0]['name'], 'song': answer['tracks']['items'][i]['name']}})
+        toSend['spotify'].update({i: {'link': answer['tracks']['items'][i]['external_urls']['spotify'], 'artist': answer['tracks']['items'][i]['artists'][0]['name'], 'title': answer['tracks']['items'][i]['name']}})
     soundcloud_id = "VTl9gNS05wF10zfiwKJ6FwK9mJsLVuAV"
     url = "https://api-v2.soundcloud.com/search?q=" + item + "&client_id=" + soundcloud_id
     url = "https://api-v2.soundcloud.com/search?q=" + urllib.parse.quote(item)
@@ -89,14 +89,6 @@ async def search(item: str):
     print(url)
     responseSoundCloud = session.get(url)
     answerSoundCloud = responseSoundCloud.json()
-    # if not answerSoundCloud:
-    #     return {'status': 'empty'}
-    # print(answerSoundCloud)
-    # print(answerSoundCloud['collection'])
-    # print('\n\n\n')
-    # print(answerSoundCloud['collection'][0]['publisher_metadata'])
-    # print(len(answerSoundCloud['collection']))
-    # 
     for c in range(0, len(answerSoundCloud['collection'])-1):
         link = answerSoundCloud['collection'][c]['uri']
         if answerSoundCloud['collection'][c]['user'] != None:
@@ -104,9 +96,8 @@ async def search(item: str):
         else:
             artist = 'none'
         title = answerSoundCloud['collection'][c]['title']
-        toSend.update( {c: {'link': link, 'artist': artist, 'title': title}})
+        toSend['soundcloud'].update( {c: {'link': link, 'artist': artist, 'title': title}})
     
-    toSend = {'soundCloud': toSend}
     return toSend
 
 
