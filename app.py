@@ -42,8 +42,6 @@ def get_access_token(auth_code: str):
     access_token = response.json()["access_token"]
     global headers
     headers = {"Authorization": "Bearer " + access_token}
-    print(response.json()["access_token"])
-    print(headers)
     return access_token
 
 
@@ -71,7 +69,6 @@ async def search(item: str):
     session = requests.Session()
     session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0"})
     global headers
-    print(headers)
     toSend = {'spotify': {}, 'soundcloud': {}}
     params = {
         'q': item,
@@ -81,12 +78,11 @@ async def search(item: str):
     response = requests.get("https://api.spotify.com/v1/search", headers=headers, params=params)
     answer = response.json()
     for i in range(0, len(answer['tracks']['items'])) :
-        toSend['spotify'].update({i: {'link': answer['tracks']['items'][i]['external_urls']['spotify'], 'artist': answer['tracks']['items'][i]['artists'][0]['name'], 'title': answer['tracks']['items'][i]['name']}})
+        toSend['spotify'].update({i: {'link': answer['tracks']['items'][i]['uri'], 'artist': answer['tracks']['items'][i]['artists'][0]['name'], 'title': answer['tracks']['items'][i]['name']}})
     soundcloud_id = "VTl9gNS05wF10zfiwKJ6FwK9mJsLVuAV"
     url = "https://api-v2.soundcloud.com/search?q=" + item + "&client_id=" + soundcloud_id
     url = "https://api-v2.soundcloud.com/search?q=" + urllib.parse.quote(item)
     url = url + "&limit=" + urllib.parse.quote("5") + "&client_id=" + urllib.parse.quote(soundcloud_id)
-    print(url)
     responseSoundCloud = session.get(url)
     answerSoundCloud = responseSoundCloud.json()
     for c in range(0, len(answerSoundCloud['collection'])-1):
@@ -97,7 +93,7 @@ async def search(item: str):
             artist = 'none'
         title = answerSoundCloud['collection'][c]['title']
         toSend['soundcloud'].update( {c: {'link': link, 'artist': artist, 'title': title}})
-    
+    toSend.update({"spotify_token": access_token})
     return toSend
 
 

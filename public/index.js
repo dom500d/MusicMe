@@ -7,6 +7,9 @@
 //     });
 // }
 //Wait for the documenmt to load
+window.onSpotifyWebPlaybackSDKReady = () => {
+    // You can now initialize Spotify.Player and use the SDK
+  };
 document.addEventListener("DOMContentLoaded", (event) => {
     const searchButton = document.querySelector('#search-button');
     let data2send;
@@ -41,6 +44,34 @@ document.addEventListener("DOMContentLoaded", (event) => {
                 }
             });
         }
+    });
+    document.addEventListener("click", (event) => {
+        if(event.target.className == "play") {
+            console.log("hi");
+        }
+        const play = ({
+            spotify_uri,
+            playerInstance: {
+              _options: {
+                getOAuthToken
+              }
+            }
+          }) => {
+            getOAuthToken(access_token => {
+              fetch(`https://api.spotify.com/v1/me/player/play?device_id=${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({ uris: [spotify_uri] }),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${access_token}`
+                },
+              });
+            });
+          };
+          play({
+            playerInstance: new Spotify.Player({ name: "MusicMe Player" }),
+            spotify_uri: 'spotify:track:7xGfFoTpQ2E7fRF5lN10tr',
+          });
     });
     function addSong(data, i, service) {
         let tbody = document.querySelector(`.${service}`);
