@@ -48,6 +48,21 @@ document.addEventListener("DOMContentLoaded", (event) => {
     document.addEventListener("click", (event) => {
         if(event.target.className == "play") {
             console.log("hi");
+        } else if(event.target.className == "playlisy") {
+          song = {'uri': event.target.parentNode.querySelector(".link").innerHTML, 'title': event.target.parentNode.querySelector(".title").innerHTML, 'artist': event.target.parentNode.querySelector(".artist").innerHTML}
+            let postOptions = {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+            body: JSON.stringify({song})
+        }
+        fetch("/addPlaylist", postOptions).then((response) => response.json())
+        .then((data) => {
+            if(data['status_code'] == 409) {
+                alert("Playlist Addition Failed!");
+            }
+        });
         }
         const play = ({
             spotify_uri,

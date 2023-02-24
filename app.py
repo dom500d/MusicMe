@@ -19,10 +19,15 @@ import os
 import requests
 import urllib
 
-
+app = FastAPI()
 load_dotenv()
 client_id = os.getenv('CLIENT_ID')
 client_secret = os.getenv('CLIENT_SECRET')
+# db_host = os.getenv('MYSQL_HOST')
+# db_user = os.getenv('MYSQL_USER')
+# db_pass = os.getenv('MYSQL_PASSWORD')
+# db_name = os.getenv('MYSQL_DATABASE')
+
 redirect_uri = "http://localhost:6543/callback"
 headers = {}
 access_token = ""
@@ -82,7 +87,7 @@ async def search(item: str):
     soundcloud_id = "VTl9gNS05wF10zfiwKJ6FwK9mJsLVuAV"
     url = "https://api-v2.soundcloud.com/search?q=" + item + "&client_id=" + soundcloud_id
     url = "https://api-v2.soundcloud.com/search?q=" + urllib.parse.quote(item)
-    url = url + "&limit=" + urllib.parse.quote("5") + "&client_id=" + urllib.parse.quote(soundcloud_id)
+    url = url + "&limit=" + urllib.parse.quote("6") + "&client_id=" + urllib.parse.quote(soundcloud_id)
     responseSoundCloud = session.get(url)
     answerSoundCloud = responseSoundCloud.json()
     for c in range(0, len(answerSoundCloud['collection'])-1):
@@ -104,6 +109,41 @@ async def callback(code):
     headers = {"Authorization": "Bearer " + access_token}
     response = requests.get("https://api.spotify.com/v1/me", headers=headers)
     return RedirectResponse(url='/', headers={'token': access_token})
+
+@app.post("/createUers/")
+async def create_user(username: str = Body(...), password: str= Body(...)):
+    db = mysql.connect(host=db_host, user=db_user, password=db_pass)
+    cursor = db.cursor()
+    cursor.execute('USE onespot')
+    try:
+        cursor.execute("insert into users (username, password) values (%s, %s);", (username, password))
+        cursor.execute('''create table %s (
+            song_id integer  AUTO_INCREMENT PRIMARY KEY,
+            link VARCHAR(300) NOT NULL, 
+            tite VARCHAR(300) NOT NULL, 
+            artist VARCHAR(300) NOT NULL);''', (username,))
+        db.commit()
+        db.close()
+        return JSONResponse(status_code=200, content={"message": "User added sucessfully!"})
+    except RuntimeError as err:
+        db.close()
+        return JSONResponse(status_code=409, content={"message":"User addition failed!", 'error':err})
+
+
+@app.post("/addPlaylist/")
+async def add_playlist(link: str = Body(...), title: str = Body(...), artist: str = Body(...)):
+    db = mysql.connect(host=db_host, user=db_user, password=db_pass)
+    cursor = db.cursor()
+    cursor.execute('USE TechAssignment6')
+    try:
+        cursor.execute("select * from orders where order_id=%s;", (order_id,))
+        db.commit()
+        db.close()
+        return JSONResponse(status_code=200, content={"message": "Order status changed!"})
+    except RuntimeError as err:
+        db.close()
+        return JSONResponse(status_code=409, content={"message":"Query Failed!", 'error':err})
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=6543)
