@@ -1,5 +1,6 @@
 body {
-    background-color:rgb(230, 183, 235)
+    background-color:rgb(230, 183, 235);
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 .input-holder {
     margin: auto;

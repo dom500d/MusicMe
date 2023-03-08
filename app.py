@@ -2,22 +2,17 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 import uvicorn
 from urllib.request import urlopen
-import json
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-import re
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi import Body
 from dotenv import load_dotenv
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
 from urllib.parse import urlencode
-import base64
-import webbrowser
 import os
 import requests
 import urllib
+import mysql.connector as mysql
 
 app = FastAPI()
 load_dotenv()
@@ -61,6 +56,10 @@ def get_html() -> HTMLResponse:
     with open("play.html") as html:
         return HTMLResponse(content=html.read())
 
+@app.get("/play1", response_class=HTMLResponse)
+def get_html() -> HTMLResponse:
+    with open("play1.html") as html:
+        return HTMLResponse(content=html.read())
 
 @app.get("/sign-in")
 async def auth():
@@ -101,7 +100,10 @@ async def search(item: str):
     toSend.update({"spotify_token": access_token})
     return toSend
 
-
+@app.get("/user/spotify_credential")
+async def get_credential():
+    print(access_token)
+    return JSONResponse({"spotify_token": access_token})
 
 @app.get("/callback")
 async def callback(code):
@@ -109,6 +111,7 @@ async def callback(code):
     headers = {"Authorization": "Bearer " + access_token}
     response = requests.get("https://api.spotify.com/v1/me", headers=headers)
     return RedirectResponse(url='/', headers={'token': access_token})
+
 
 @app.post("/createUers/")
 async def create_user(username: str = Body(...), password: str= Body(...)):
@@ -134,7 +137,7 @@ async def create_user(username: str = Body(...), password: str= Body(...)):
 async def add_playlist(link: str = Body(...), title: str = Body(...), artist: str = Body(...)):
     db = mysql.connect(host=db_host, user=db_user, password=db_pass)
     cursor = db.cursor()
-    cursor.execute('USE TechAssignment6')
+    cursor.execute('USE OneSpot')
     try:
         cursor.execute("select * from orders where order_id=%s;", (order_id,))
         db.commit()
